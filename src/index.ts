@@ -47,6 +47,8 @@ export class Client {
   }
 
   public fetchSession(): Promise<void> {
+    const myNewVar = 'Hello';
+    console.log(myNewVar);
     const sessionPromise = this.httpRequest.get<ISession>(this.sessionUrl, this.httpHeaders);
     return sessionPromise.then(session => {
       this.session = session;

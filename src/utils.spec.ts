@@ -3,6 +3,10 @@ import { stripSubject } from './utils';
 describe('stripSubject', () => {
   const expected = 'Helloworld!';
 
+  it('will fail', () => {
+    fail();
+  });
+
   it('should return same string', () => {
     expect(stripSubject('Helloworld!')).toEqual(expected);
   });
