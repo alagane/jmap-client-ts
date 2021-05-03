@@ -3,14 +3,12 @@ import {
   IEmailGetResponse,
   IEmailQueryResponse,
   IEmailSetResponse,
-  IArguments,
   IMailboxGetResponse,
   IMailboxSetResponse,
   ISession,
   IEmailGetArguments,
   IMailboxGetArguments,
   IMailboxSetArguments,
-  IMethodName,
   IReplaceableAccountId,
   IEmailQueryArguments,
   IEmailSetArguments,
@@ -24,7 +22,9 @@ import {
   IEmailSubmissionChangesResponse,
   IEmailChangesArguments,
   IEmailChangesResponse,
-  IInvocation,
+  IRequestNameMap,
+  IResponseNameMap,
+  IInvocationResponse,
 } from './types';
 
 export class Client {
@@ -94,57 +94,60 @@ export class Client {
   }
 
   public mailbox_get(args: IMailboxGetArguments): Promise<IMailboxGetResponse> {
-    return this.request<IMailboxGetResponse>('Mailbox/get', args);
+    return this.request('Mailbox/get', args);
   }
 
   public mailbox_changes(args: IMailboxChangesArguments): Promise<IMailboxChangesResponse> {
-    return this.request<IMailboxChangesResponse>('Mailbox/changes', args);
+    return this.request('Mailbox/changes', args);
   }
 
   public mailbox_set(args: IMailboxSetArguments): Promise<IMailboxSetResponse> {
-    return this.request<IMailboxSetResponse>('Mailbox/set', args);
+    return this.request('Mailbox/set', args);
   }
 
   public email_get(args: IEmailGetArguments): Promise<IEmailGetResponse> {
-    return this.request<IEmailGetResponse>('Email/get', args);
+    return this.request('Email/get', args);
   }
 
   public email_changes(args: IEmailChangesArguments): Promise<IEmailChangesResponse> {
-    return this.request<IEmailChangesResponse>('Email/changes', args);
+    return this.request('Email/changes', args);
   }
 
   public email_query(args: IEmailQueryArguments): Promise<IEmailQueryResponse> {
-    return this.request<IEmailQueryResponse>('Email/query', args);
+    return this.request('Email/query', args);
   }
 
   public email_set(args: IEmailSetArguments): Promise<IEmailSetResponse> {
-    return this.request<IEmailSetResponse>('Email/set', args);
+    return this.request('Email/set', args);
   }
 
   public emailSubmission_get(
     args: IEmailSubmissionGetArguments,
   ): Promise<IEmailSubmissionGetResponse> {
-    return this.request<IEmailSubmissionGetResponse>('EmailSubmission/get', args);
+    return this.request('EmailSubmission/get', args);
   }
 
   public emailSubmission_changes(
     args: IEmailSubmissionChangesArguments,
   ): Promise<IEmailSubmissionChangesResponse> {
-    return this.request<IEmailSubmissionChangesResponse>('EmailSubmission/changes', args);
+    return this.request('EmailSubmission/changes', args);
   }
 
   public emailSubmission_set(
     args: IEmailSubmissionSetArguments,
   ): Promise<IEmailSubmissionSetResponse> {
-    return this.request<IEmailSubmissionSetResponse>('EmailSubmission/set', args);
+    return this.request('EmailSubmission/set', args);
   }
 
-  private request<ResponseType>(methodName: IMethodName, args: IArguments) {
+  private request<MethodName extends keyof IRequestNameMap>(
+    methodName: MethodName,
+    args: IRequestNameMap[MethodName],
+  ): Promise<IResponseNameMap[MethodName]> {
     const apiUrl = this.overriddenApiUrl || this.getSession().apiUrl;
     return this.transport
       .post<{
         sessionState: string;
-        methodResponses: IInvocation<ResponseType>[];
+        methodResponses: [IInvocationResponse<MethodName> | IInvocationResponse<'error'>];
       }>(
         apiUrl,
         {
@@ -160,7 +163,7 @@ export class Client {
           throw methodResponse[1];
         }
 
-        return methodResponse[1];
+        return methodResponse[1] as IResponseNameMap[MethodName];
       });
   }
 

@@ -1,25 +1,44 @@
-export type IMethodName =
-  | 'Mailbox/get'
-  | 'Mailbox/changes'
-  | 'Mailbox/set'
-  | 'Email/get'
-  | 'Email/changes'
-  | 'Email/query'
-  | 'Email/set'
-  | 'EmailSubmission/get'
-  | 'EmailSubmission/changes'
-  | 'EmailSubmission/set';
+export type IRequestNameMap = {
+  'Mailbox/get': IMailboxGetArguments;
+  'Mailbox/changes': IMailboxChangesArguments;
+  'Mailbox/set': IMailboxSetArguments;
+  'Email/get': IEmailGetArguments;
+  'Email/changes': IEmailChangesArguments;
+  'Email/query': IEmailQueryArguments;
+  'Email/set': IEmailSetArguments;
+  'EmailSubmission/get': IEmailSubmissionGetArguments;
+  'EmailSubmission/changes': IEmailSubmissionChangesArguments;
+  'EmailSubmission/set': IEmailSubmissionSetArguments;
+};
 
-export type IErrorName = 'error';
-
-export type IInvocationName = IMethodName | IErrorName;
+export type IResponseNameMap = {
+  'Mailbox/get': IMailboxGetResponse;
+  'Mailbox/changes': IMailboxChangesResponse;
+  'Mailbox/set': IMailboxSetResponse;
+  'Email/get': IEmailGetResponse;
+  'Email/changes': IEmailChangesResponse;
+  'Email/query': IEmailQueryResponse;
+  'Email/set': IEmailSetResponse;
+  'EmailSubmission/get': IEmailSubmissionGetResponse;
+  'EmailSubmission/changes': IEmailSubmissionChangesResponse;
+  'EmailSubmission/set': IEmailSubmissionSetResponse;
+  error: IErrorType;
+};
 
 /**
  * See https://jmap.io/spec-core.html#the-invocation-data-type
  */
-export type IInvocation<ArgumentsType> = [
-  name: IInvocationName,
-  arguments: ArgumentsType,
+export type IInvocation = IInvocationRequest | IInvocationResponse;
+
+export type IInvocationRequest<Name extends keyof IRequestNameMap = keyof IRequestNameMap> = [
+  name: Name,
+  arguments: IRequestNameMap[Name],
+  methodCallId: string,
+];
+
+export type IInvocationResponse<Name extends keyof IResponseNameMap = keyof IResponseNameMap> = [
+  name: Name,
+  arguments: IResponseNameMap[Name],
   methodCallId: string,
 ];
 
@@ -159,7 +178,7 @@ export interface IComparator {
  */
 export interface IRequest {
   using: string[];
-  methodCalls: IInvocation<IArguments>[];
+  methodCalls: IInvocationRequest[];
   createdIds?: { [creationId: string]: string };
 }
 
